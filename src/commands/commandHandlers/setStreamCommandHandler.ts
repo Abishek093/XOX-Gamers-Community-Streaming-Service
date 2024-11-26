@@ -96,4 +96,34 @@ export class StreamCommandHandler {
             throw new CustomError("Internal Server Error", 500);
         }
     };
+
+    endtStreamCommandHandler = async (streamKey: string): Promise<void> => {
+        try {
+            if (!streamKey) {
+                throw new CustomError('Stream key is required', 400);
+            }
+            const { userId, streamToken, expirationTimestamp } = extractCompactKey(streamKey);
+            let userObjectId: Types.ObjectId;
+            try {
+                userObjectId = new Types.ObjectId(userId);
+                console.log("userObjectId: ",userObjectId)
+            } catch (error) {
+                throw new CustomError('Invalid user ID format', 400);
+            }
+            const stream = await this.streamRepository.findStreamByUserIdAndToken(userObjectId, streamKey);
+
+            if (!stream) {
+                throw new CustomError('Invalid stream key or stream not found', 404);
+            }
+
+            await this.streamRepository.endStream(userObjectId, streamKey)
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            console.error(error);
+            throw new CustomError("Internal Server Error", 500);
+        }
+    };
 }
+

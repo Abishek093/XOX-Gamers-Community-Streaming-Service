@@ -10,6 +10,7 @@ const streamQueryController = new StreamQueryController();
 
 router.post("/upload-url", streamCommandController.generatePresignedUrl);
 router.post('/start-stream', streamCommandController.startStream);
+router.post('/stream_done', streamCommandController.endStream);
 router.get('/streams', streamQueryController.getStreams);
 router.post('/validate_stream', streamCommandController.validateStream)
 

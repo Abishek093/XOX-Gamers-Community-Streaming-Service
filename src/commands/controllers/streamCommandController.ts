@@ -123,4 +123,36 @@ export class StreamCommandController {
             next(error);
         }
     };
+
+    endStream = async (req: Request, res: Response, next: NextFunction):Promise<void> => {
+        try {
+            let streamKey: string | null = null;
+    
+            if (Buffer.isBuffer(req.body)) {
+                const bodyString = req.body.toString('utf8');
+                const nameMatch = bodyString.match(/name=(.*?)(&|$)/);
+                streamKey = nameMatch ? decodeURIComponent(nameMatch[1]) : null;
+                console.log("End stream: ",streamKey)
+            } else if (typeof req.body === 'object') {
+                streamKey = req.body.name;
+                console.log("End stream: ",streamKey)
+            } else if (typeof req.body === 'string') {
+                const nameMatch = req.body.match(/name=(.*?)(&|$)/);
+                streamKey = nameMatch ? decodeURIComponent(nameMatch[1]) : null;
+                console.log("End stream: ",streamKey)
+            }
+            if (!streamKey) {
+                res.status(400).json({
+                    status: 'error',
+                    message: 'No stream key provided',
+                    details: { bodyType: typeof req.body }
+                });
+                return;
+            }
+            await this.streamCommandHandler.endtStreamCommandHandler(streamKey)
+            res.status(200).send('OK');
+        } catch (error) {
+            next(error);
+        }
+    };
 }
